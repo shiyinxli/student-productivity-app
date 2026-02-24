@@ -122,3 +122,86 @@ then
 ```
 \dt
 ```
+
+## authentication & user registration
+### 1. Create Pydantic Schemas(for request/response validation)
+create a new file `schemas.py`
+create a file `auth.py`
+update `main.py` with Auth Endpoints
+### test authentication system
+start FastAPI backend
+```
+# Navigate to backend folder
+cd student-productivity-app/backend
+
+# Activate virtual environment
+source venv/bin/activate  # (Mac/Linux)
+# or venv\Scripts\activate  (Windows)
+
+# Run the server
+uvicorn main:app --reload
+```
+check if your server is working
+Open your browser and go to: http://127.0.0.1:8000
+You should see:
+```
+{"message": "Backend running"}
+```
+open a new terminal window
+```
+# Connect to your database
+psql student_productivity
+
+# List all tables (you should see 'users')
+\dt
+
+# You should see:
+#         List of relations
+#  Schema | Name  | Type  | Owner
+# --------+-------+-------+-------
+#  public | users | table | yourusername
+
+# Exit PostgreSQL
+\q
+```
+In a new terminal window, run:
+```
+curl -X POST http://localhost:8000/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "password123"}'
+  ```
+  you should expect:
+  ```
+  {"id":1,"email":"test@example.com","created_at":"2024-01-01T12:00:00.123Z"}
+  ```
+  Verify user was created in database
+  ```
+  # Connect to database
+psql student_productivity
+
+# Check users table
+SELECT * FROM users;
+
+# You should see your test user with a hashed password (not "password123")
+# id |      email       |         hashed_password         |         created_at
+# ----+------------------+----------------------------------+----------------------------
+#   1 | test@example.com | $2b$12$... (long hash string)   | 2024-01-01 12:00:00.123
+
+# Exit
+\q
+```
+Text login:
+```
+curl -X POST http://localhost:8000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "password123"}'
+  ```
+  Expected response:
+  ```
+  {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","token_type":"bearer"}
+```
+## requirements.txt
+requirements.txt is a standard file in Python projects that lists all the dependencies (packages) your project needs to run.
+```
+pip freeze > requirements.txt
+```
